@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
-import './App.css'; // Use your own custom styles if needed
-import ImageUploader from './components/ImageUploader';
-import PhotoMap from './components/PhotoMap';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './App.css';
+import './styles/global.css'; // We'll create this for global styles
+import Navbar from './components/Navbar';
+import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
+import ItineraryPage from './pages/ItineraryPage';
+import RecommendationsPage from './pages/RecommendationsPage';
 
 function App() {
-  const [markers, setMarkers] = useState([]);
-
   return (
-    <div className="App">
-      <h1>My Photo Journey</h1>
-      <ImageUploader onImagesLoaded={setMarkers} />
-      {markers.length > 0 && <PhotoMap markers={markers} />}
-    </div>
+    <Router>
+      <div className="App">
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/itinerary" element={<ItineraryPage />} />
+            <Route path="/recommendations" element={<RecommendationsPage />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 

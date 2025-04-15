@@ -1,0 +1,87 @@
+/* src/styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --primary-light: #e3f2fd;
+  --accent-color: #f39c12;
+  --text-color: #2c3e50;
+  --text-light: #7f8c8d;
+  --background: #ffffff;
+  --background-alt: #f9f9f9;
+  --border-color: #e0e0e0;
+  --danger-color: #e74c3c;
+  --success-color: #2ecc71;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-color);
+  background-color: var(--background);
+  line-height: 1.6;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+button {
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  outline: none;
+}
+
+input, select, textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-color);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+}

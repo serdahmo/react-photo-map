@@ -1,0 +1,89 @@
+/* src/components/components.css */
+
+/* App Container */
+.App {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .App h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+  }
+  
+  /* Image Uploader */
+  .image-uploader {
+    margin-bottom: 30px;
+  }
+  
+  .upload-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  
+  .file-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  .file-label {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  
+  .file-label:hover {
+    background-color: #2980b9;
+  }
+  
+  .loading {
+    color: #3498db;
+    font-weight: 600;
+  }
+  
+  .error {
+    color: #e74c3c;
+    font-weight: 600;
+  }
+  
+  /* Map Container */
+  .map-container {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Photo Popup */
+  .photo-popup {
+    text-align: center;
+    padding: 5px;
+  }
+  
+  .photo-popup strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #2c3e50;
+  }
+  
+  .photo-popup p {
+    margin: 5px 0 10px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+  }
+  
+  .photo-popup img {
+    border-radius: 4px;
+    margin-top: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
