@@ -1,0 +1,114 @@
+/* Google Maps specific styles */
+.map-container {
+    width: 100%;
+    height: 600px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .map-container-wrapper {
+    margin-top: 30px;
+  }
+  
+  .photo-popup {
+    padding: 10px;
+    max-width: 220px;
+    text-align: center;
+  }
+  
+  .photo-popup h3 {
+    font-size: 16px;
+    margin: 0 0 10px;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .photo-popup img {
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .photo-popup p {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #666;
+  }
+  
+  /* Map controls styling */
+  .map-controls {
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .map-type-selector {
+    display: flex;
+    align-items: center;
+  }
+  
+  .map-type-selector select {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-left: 10px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .map-container {
+      height: 400px;
+    }
+  }
+  /* Photo strip styling */
+.photo-strip {
+    display: flex;
+    overflow-x: auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: -10px;
+    z-index: 1;
+    position: relative;
+  }
+  
+  .photo-thumbnail {
+    flex: 0 0 auto;
+    width: 100px;
+    height: 100px;
+    margin-right: 10px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .photo-thumbnail:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .photo-thumbnail.active {
+    border: 3px solid var(--primary-color);
+  }
+  
+  .photo-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Enhanced map container */
+  .enhanced-map-container {
+    margin-bottom: 30px;
+  }

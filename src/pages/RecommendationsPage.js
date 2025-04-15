@@ -1,164 +1,164 @@
 // src/pages/RecommendationsPage.js
 import React, { useState, useEffect } from 'react';
+import openAIService from '../utils/openAIUtils';
 import '../styles/recommendations.css';
 
 function RecommendationsPage() {
   const [markers, setMarkers] = useState([]);
-  const [aiKey, setAiKey] = useState('');
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [keyVerified, setKeyVerified] = useState(false);
+  const [error, setError] = useState(null);
   
   // Get markers from localStorage
   useEffect(() => {
     const savedMarkers = localStorage.getItem('photoMarkers');
-    const savedKey = localStorage.getItem('openAiKey');
-    
     if (savedMarkers) {
-      setMarkers(JSON.parse(savedMarkers));
-    }
-    
-    if (savedKey) {
-      setAiKey(savedKey);
-      setKeyVerified(true);
+      try {
+        setMarkers(JSON.parse(savedMarkers));
+      } catch (err) {
+        console.error('Error parsing markers from localStorage:', err);
+      }
     }
   }, []);
   
-  const saveApiKey = () => {
-    localStorage.setItem('openAiKey', aiKey);
-    setKeyVerified(true);
-  };
-  
   const getRecommendations = async () => {
-    if (!aiKey) return;
+    if (markers.length === 0) return;
     
     setLoading(true);
+    setError(null);
     
     try {
-      // Extract locations from markers
-      const locations = markers.map(marker => {
-        // Attempt to reverse geocode or just use coordinates
-        return {
-          coordinates: [marker.latitude, marker.longitude],
-          name: marker.fileName.split('.')[0] // Use filename as location name for now
-        };
-      });
+      // Create a list of unique locations
+      const uniqueLocations = markers.reduce((acc, marker) => {
+        // Check if this location is already in our list (approximate match)
+        const isDuplicate = acc.some(loc => 
+          calculateDistance(loc.latitude, loc.longitude, marker.latitude, marker.longitude) < 1
+        );
+        
+        if (!isDuplicate) {
+          acc.push({
+            latitude: marker.latitude,
+            longitude: marker.longitude,
+            name: marker.fileName?.split('.')[0] || "Unknown"
+          });
+        }
+        
+        return acc;
+      }, []);
       
-      // Create a prompt for OpenAI
-      const prompt = `Based on these travel locations: ${locations.map(loc => loc.name).join(', ')}, 
-      please provide travel recommendations for similar places to visit, things to do, 
-      and travel tips for this region. Format the recommendations as JSON with categories: 
-      "placesToVisit", "thingsToDo", "travelTips", and "localCuisine".`;
-      
-      // Make API request to OpenAI
-      const response = await fetch('https://api.openai.com/v1/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${aiKey}`
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo-instruct", // Update this with the latest model
-          prompt: prompt,
-          max_tokens: 500,
-          temperature: 0.7
-        })
-      });
-      
-      const data = await response.json();
-      
-      // Parse the response
-      const responseText = data.choices[0].text;
-      const parsedRecommendations = JSON.parse(responseText);
-      
-      setRecommendations(parsedRecommendations);
-    } catch (error) {
-      console.error('Error getting recommendations:', error);
-      alert('Failed to get recommendations. Check your API key and try again.');
+      // Get recommendations from OpenAI
+      const aiRecommendations = await openAIService.generateRecommendations(uniqueLocations);
+      setRecommendations(aiRecommendations);
+    } catch (err) {
+      console.error('Error getting recommendations:', err);
+      setError('Failed to get recommendations. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
+  };
+  
+  // Calculate distance between two coordinates in km (Haversine formula)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const d = R * c;
+    return d;
   };
   
   return (
     <div className="recommendations-page">
       <h1>Travel Recommendations</h1>
       
-      {!keyVerified ? (
-        <div className="api-key-section">
-          <p>Enter your OpenAI API key to get personalized travel recommendations</p>
-          <div className="api-key-input">
-            <input
-              type="password"
-              placeholder="OpenAI API Key"
-              value={aiKey}
-              onChange={(e) => setAiKey(e.target.value)}
-            />
-            <button onClick={saveApiKey}>Save Key</button>
-          </div>
-          <p className="key-note">Your API key is stored locally in your browser and never sent to our servers.</p>
+      {markers.length === 0 ? (
+        <div className="no-photos-message">
+          <p>Upload photos in the Map section to get recommendations based on your travels</p>
         </div>
       ) : (
-        <>
-          {markers.length === 0 ? (
-            <div className="no-photos-message">
-              <p>Upload photos in the Map section to get recommendations based on your travels</p>
-            </div>
-          ) : (
-            <div className="recommendations-generator">
-              <p>Get travel recommendations based on your {markers.length} photos</p>
-              <button
-                className="generate-button"
-                onClick={getRecommendations}
-                disabled={loading}
-              >
-                {loading ? 'Getting Recommendations...' : 'Get Recommendations'}
-              </button>
+        <div className="recommendations-generator">
+          <p>Get personalized travel recommendations based on your {markers.length} photos</p>
+          <button
+            className="generate-button"
+            onClick={getRecommendations}
+            disabled={loading}
+          >
+            {loading ? 'Getting Recommendations...' : 'Get Recommendations'}
+          </button>
+          
+          {error && <p className="error-message">{error}</p>}
+          
+          {recommendations && (
+            <div className="recommendations-results">
+              <h2>Your Travel Recommendations</h2>
               
-              {recommendations && (
-                <div className="recommendations-results">
-                  <h2>Your Travel Recommendations</h2>
-                  
-                  <div className="recommendation-section">
-                    <h3>Places to Visit</h3>
-                    <ul>
-                      {recommendations.placesToVisit.map((place, index) => (
-                        <li key={index}>{place}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="recommendation-section">
-                    <h3>Things to Do</h3>
-                    <ul>
-                      {recommendations.thingsToDo.map((activity, index) => (
-                        <li key={index}>{activity}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="recommendation-section">
-                    <h3>Travel Tips</h3>
-                    <ul>
-                      {recommendations.travelTips.map((tip, index) => (
-                        <li key={index}>{tip}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="recommendation-section">
-                    <h3>Local Cuisine to Try</h3>
-                    <ul>
-                      {recommendations.localCuisine.map((food, index) => (
-                        <li key={index}>{food}</li>
-                      ))}
-                    </ul>
-                  </div>
+              <div className="recommendation-section">
+                <h3>Places to Visit</h3>
+                <ul className="detailed-list">
+                  {recommendations.placesToVisit?.map((place, index) => (
+                    <li key={index}>{place}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="recommendation-section">
+                <h3>Things to Do</h3>
+                <ul className="detailed-list">
+                  {recommendations.thingsToDo?.map((activity, index) => (
+                    <li key={index}>{activity}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="recommendation-section">
+                <h3>Travel Tips</h3>
+                <ul className="detailed-list">
+                  {recommendations.travelTips?.map((tip, index) => (
+                    <li key={index}>{tip}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="recommendation-section">
+                <h3>Local Cuisine to Try</h3>
+                <ul className="detailed-list">
+                  {recommendations.localCuisine?.map((food, index) => (
+                    <li key={index}>{food}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              {recommendations.culturalInsights && (
+                <div className="recommendation-section">
+                  <h3>Cultural Insights</h3>
+                  <ul className="detailed-list">
+                    {recommendations.culturalInsights?.map((insight, index) => (
+                      <li key={index}>{insight}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {recommendations.bestTimeToVisit && (
+                <div className="recommendation-section">
+                  <h3>Best Time to Visit</h3>
+                  <p className="detailed-text">{recommendations.bestTimeToVisit}</p>
+                </div>
+              )}
+              
+              {recommendations.budgetConsiderations && (
+                <div className="recommendation-section">
+                  <h3>Budget Considerations</h3>
+                  <p className="detailed-text">{recommendations.budgetConsiderations}</p>
                 </div>
               )}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

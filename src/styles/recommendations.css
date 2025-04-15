@@ -1,0 +1,112 @@
+/* src/styles/recommendations.css */
+.recommendations-page {
+    padding: 20px;
+  }
+  
+  .recommendations-page h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+  }
+  
+  .no-photos-message {
+    text-align: center;
+    padding: 50px;
+    background-color: var(--background-alt);
+    border-radius: 10px;
+    margin: 30px 0;
+    color: var(--text-light);
+  }
+  
+  .recommendations-generator {
+    text-align: center;
+    margin: 30px 0;
+  }
+  
+  .recommendations-generator p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+  
+  .generate-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .generate-button:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .generate-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    color: var(--danger-color);
+    margin-top: 20px;
+    font-weight: 500;
+  }
+  
+  .recommendations-results {
+    margin-top: 40px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    text-align: left;
+  }
+  
+  .recommendations-results h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--primary-color);
+    font-weight: 700;
+  }
+  
+  .recommendation-section {
+    margin-bottom: 35px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .recommendation-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .recommendation-section h3 {
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-light);
+  }
+  
+  .detailed-list {
+    padding-left: 20px;
+  }
+  
+  .detailed-list li {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    text-align: justify;
+  }
+  
+  .detailed-text {
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 15px;
+  }
+  
+  @media (max-width: 768px) {
+    .recommendations-results {
+      padding: 20px;
+    }
+  }

@@ -1,0 +1,105 @@
+/* src/styles/api-key-config.css */
+.api-key-config {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .key-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .key-header h3 {
+    margin: 0;
+    color: var(--text-color);
+  }
+  
+  .edit-key-button {
+    background-color: var(--background-alt);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .edit-key-button:hover {
+    background-color: var(--border-color);
+  }
+  
+  .key-input-section p {
+    margin-bottom: 15px;
+    color: var(--text-color);
+  }
+  
+  .key-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .key-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .save-key-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .save-key-button:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .save-key-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .key-privacy-note {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 5px;
+  }
+  
+  .key-status {
+    display: flex;
+    align-items: center;
+  }
+  
+  .key-status p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    color: var(--success-color);
+    font-weight: 500;
+  }
+  
+  .key-status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-size: 0.9rem;
+  }

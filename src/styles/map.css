@@ -1,0 +1,71 @@
+/* src/styles/map.css */
+.map-page {
+    padding: 20px;
+  }
+  
+  .map-page h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+  }
+  
+  .subtitle {
+    text-align: center;
+    color: var(--text-light);
+    margin-bottom: 30px;
+  }
+  
+  .map-container {
+    margin-top: 30px;
+  }
+  
+  .map-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .map-info h2 {
+    margin-bottom: 0;
+    color: var(--text-color);
+  }
+  
+  .map-info p {
+    color: var(--text-light);
+    margin-bottom: 0;
+  }
+  
+  .empty-map {
+    background-color: var(--background-alt);
+    border-radius: 10px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .empty-map-message {
+    text-align: center;
+    padding: 30px;
+    max-width: 500px;
+  }
+  
+  .empty-map-message h3 {
+    color: var(--text-color);
+    margin-bottom: 10px;
+  }
+  
+  .empty-map-message p {
+    color: var(--text-light);
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .map-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+  }
