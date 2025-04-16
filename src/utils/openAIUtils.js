@@ -1,4 +1,5 @@
 // src/utils/openAIUtils.js
+import analyzeCoordinates from './locationAnalyzer';
 
 // Get API key from environment variable
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -10,6 +11,12 @@ class OpenAIService {
 
   async generateText(prompt, systemPrompt = "You are a helpful travel assistant that provides detailed information about locations and creates comprehensive itineraries.", temperature = 0.7) {
     try {
+      // Validate API key
+      if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
+        console.warn("OpenAI API key is missing or invalid");
+        throw new Error("API key missing or invalid");
+      }
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -33,6 +40,10 @@ class OpenAIService {
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
       const data = await response.json();
       
       if (data.error) {
@@ -47,40 +58,69 @@ class OpenAIService {
     }
   }
 
-  async generateLocationInfo(latitude, longitude) {
+  async generateLocationFromImage(imageUrl, latitude, longitude) {
     try {
+      // Use local analysis if API key issues
+      if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
+        return this.generateFallbackLocationInfo(latitude, longitude);
+      }
+      
       const prompt = `I have a photo taken at coordinates: ${latitude}, ${longitude}. 
-      Please provide extensive, detailed information about this location in JSON format with these fields:
+      If these coordinates don't clearly identify a specific named location, please analyze the general region and:
+      
+      1. Provide a description of what the region is likely to be (coastal area, mountains, urban environment, etc.)
+      2. Suggest what this place might be based on its geographic position
+      3. Describe activities and points of interest that would typically be found in this type of location or region
+      
+      Respond with VALID JSON in this exact format:
       {
-        "locationName": "City, Country",
-        "description": "Detailed description of the area (at least 150 words)",
-        "history": "Historical information about this location (at least 100 words)",
-        "pointsOfInterest": ["Place 1 with description", "Place 2 with description", "Place 3 with description"],
-        "bestTimeToVisit": "Season or time with explanation",
-        "culturalTips": "Detailed cultural information and local customs",
-        "foodAndDrink": "Local culinary specialties and where to find them"
+        "locationName": "Best guess at location name or descriptive label (e.g., 'Coastal Town in Southern Italy' or 'Mountain Region in the Alps')",
+        "description": "Detailed description based on the coordinates and regional characteristics (at least 150 words)",
+        "vibeDescription": "Description of the atmosphere/vibe of this type of place",
+        "pointsOfInterest": ["Nearby attraction 1 with description", "Nearby attraction 2 with description", "Nearby attraction 3 with description"],
+        "recommendedActivities": ["Activity 1 appropriate for this region", "Activity 2", "Activity 3"],
+        "localSpecialties": ["Food/cultural item 1 typical of this region", "Food/cultural item 2", "Food/cultural item 3"]
       }`;
       
-      const result = await this.generateText(prompt, 
-        "You are a travel expert who provides extremely detailed, comprehensive information about locations. Include historical context, cultural significance, and vivid descriptions. Always respond in valid JSON format only.");
+      const systemPrompt = "You are a travel expert with extensive knowledge of global geography. When given coordinates, identify the location as specifically as possible, or if precise identification isn't possible, provide rich, descriptive information about the general region and what travelers might expect there. Always respond with valid JSON only.";
       
+      const result = await this.generateText(prompt, systemPrompt, 0.8);
       return JSON.parse(result);
     } catch (error) {
-      console.error("Failed to get location info:", error);
-      return {
-        locationName: "Unknown Location",
-        description: "Information not available",
-        history: "Historical information not available",
-        pointsOfInterest: [],
-        bestTimeToVisit: "Any time",
-        culturalTips: "",
-        foodAndDrink: ""
-      };
+      console.error("Failed to analyze location:", error);
+      return this.generateFallbackLocationInfo(latitude, longitude);
     }
+  }
+
+  generateFallbackLocationInfo(latitude, longitude) {
+    // Use our local analyzer to get location info
+    const analysis = analyzeCoordinates(latitude, longitude);
+    
+    return {
+      locationName: analysis.regionName,
+      description: analysis.description,
+      vibeDescription: "A pleasant locale with its own unique atmosphere and character worth exploring.",
+      pointsOfInterest: [
+        "Local attractions within a short distance",
+        "Natural features characteristic of this region",
+        "Cultural landmarks that showcase local history"
+      ],
+      recommendedActivities: analysis.activities,
+      localSpecialties: [
+        "Regional cuisine specialties",
+        "Local crafts and artisanal products",
+        "Cultural traditions unique to this area"
+      ]
+    };
   }
 
   async generateItinerary(locations) {
     try {
+      // Validate API key
+      if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
+        return this.generateFallbackItinerary(locations);
+      }
+      
       // Format the locations for the prompt
       const locationsList = locations.map(loc => 
         `- Location: ${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`
@@ -115,24 +155,39 @@ class OpenAIService {
       return JSON.parse(result);
     } catch (error) {
       console.error("Failed to generate itinerary:", error);
-      return { 
-        days: locations.map((loc, index) => ({
-          day: index + 1,
-          location: "Location information unavailable",
-          description: "Could not retrieve location information",
-          historicalContext: "",
-          activities: [],
-          diningRecommendations: [],
-          accommodationTips: "",
-          transportationTips: "",
-          timeToSpend: "Unknown"
-        }))
-      };
+      return this.generateFallbackItinerary(locations);
     }
+  }
+  
+  generateFallbackItinerary(locations) {
+    return { 
+      days: locations.map((loc, index) => {
+        const analysis = analyzeCoordinates(loc.latitude, loc.longitude);
+        return {
+          day: index + 1,
+          location: analysis.regionName,
+          description: analysis.description,
+          historicalContext: "This region has a rich and diverse history that has shaped its current culture and attractions.",
+          activities: analysis.activities,
+          diningRecommendations: [
+            "Local specialty restaurants showcasing regional cuisine",
+            "Casual dining options for authentic local flavors"
+          ],
+          accommodationTips: "Options range from luxury resorts to budget-friendly accommodations depending on your preferences.",
+          transportationTips: "Consider renting a vehicle to explore the area or use local transportation options if available.",
+          timeToSpend: analysis.bestTimeToVisit
+        };
+      })
+    };
   }
 
   async generateRecommendations(locations) {
     try {
+      // Validate API key
+      if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
+        return this.generateFallbackRecommendations(locations);
+      }
+      
       // Format the locations for the prompt
       const locationsList = locations.map(loc => 
         `- Location: ${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`
@@ -158,16 +213,40 @@ class OpenAIService {
       return JSON.parse(result);
     } catch (error) {
       console.error("Failed to generate recommendations:", error);
-      return {
-        placesToVisit: ["Error retrieving recommendations"],
-        thingsToDo: ["Please check your API key or try again later"],
-        travelTips: [],
-        localCuisine: [],
-        culturalInsights: [],
-        bestTimeToVisit: "",
-        budgetConsiderations: ""
-      };
+      return this.generateFallbackRecommendations(locations);
     }
+  }
+  
+  generateFallbackRecommendations(locations) {
+    // Use the first location for region analysis
+    const firstLocation = locations[0];
+    const analysis = analyzeCoordinates(firstLocation.latitude, firstLocation.longitude);
+    
+    return {
+      placesToVisit: [
+        "Consider exploring major attractions in this region which typically include natural wonders, historical sites, and cultural landmarks.",
+        "Look for local parks, beaches, or recreational areas that showcase the natural beauty of this region.",
+        "Seek out museums or historical sites that tell the story of the local culture and heritage."
+      ],
+      thingsToDo: analysis.activities,
+      travelTips: [
+        "Research local customs and etiquette before your visit to ensure respectful interactions.",
+        "Pack appropriate clothing for the local climate and any specific activities you plan to enjoy.",
+        "Consider learning a few phrases in the local language to enhance your interaction with residents."
+      ],
+      localCuisine: [
+        "Try regional specialties featuring local ingredients and traditional cooking methods.",
+        "Visit local markets to sample fresh produce and authentic prepared foods.",
+        "Consider booking a food tour to get an expert introduction to the local culinary scene."
+      ],
+      culturalInsights: [
+        "This region likely has unique cultural traditions that reflect its history and environment.",
+        "Look for opportunities to experience local arts, music, or festivals during your visit.",
+        "Engage with local communities respectfully to gain authentic insights into daily life."
+      ],
+      bestTimeToVisit: analysis.bestTimeToVisit,
+      budgetConsiderations: "Costs can vary widely based on accommodation choices, dining preferences, and activities. Research current prices for your specific destination and travel style."
+    };
   }
 }
 

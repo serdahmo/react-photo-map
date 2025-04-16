@@ -1,12 +1,13 @@
 // src/pages/MapPage.js
 import React, { useState, useEffect } from 'react';
 import ImageUploader from '../components/ImageUploader';
-import GooglePhotoMap from '../components/GooglePhotoMap';
+import SimpleGoogleMap from '../components/SimpleGoogleMap'; // Updated import
 import PhotoManager from '../components/PhotoManager';
 import '../styles/map.css';
 
 function MapPage() {
   const [markers, setMarkers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Load markers from localStorage on component mount
@@ -51,7 +52,7 @@ function MapPage() {
             <h2>Your Travel Map</h2>
             <p>{markers.length} photo{markers.length !== 1 ? 's' : ''} on your map</p>
           </div>
-          <GooglePhotoMap markers={markers} />
+          <SimpleGoogleMap markers={markers} />
         </div>
       ) : (
         <div className="empty-map">

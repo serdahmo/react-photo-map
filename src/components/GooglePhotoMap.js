@@ -26,7 +26,7 @@ function GooglePhotoMap({ markers }) {
 
   // Function to fit map bounds to all markers
   const fitBounds = useCallback(() => {
-    if (map && markers.length > 1) {
+    if (map && window.google && window.google.maps && markers.length > 1) {
       const bounds = new window.google.maps.LatLngBounds();
       markers.forEach(marker => {
         bounds.extend({
@@ -40,7 +40,7 @@ function GooglePhotoMap({ markers }) {
 
   // When markers change, fit bounds
   useEffect(() => {
-    if (map && markers.length > 0) {
+    if (map && window.google && window.google.maps && markers.length > 0) {
       fitBounds();
     }
   }, [map, markers, fitBounds]);
@@ -75,7 +75,6 @@ function GooglePhotoMap({ markers }) {
             fullscreenControl: true
           }}
         >
-          {/* Create a marker for each photo location */}
           {markers.map((marker, index) => (
             <Marker
               key={index}
@@ -84,11 +83,9 @@ function GooglePhotoMap({ markers }) {
                 lng: marker.longitude
               }}
               onClick={() => handleMarkerClick(marker)}
-              animation={window.google.maps.Animation.DROP}
             />
           ))}
 
-          {/* Show info window when a marker is selected */}
           {selectedMarker && (
             <InfoWindow
               position={{

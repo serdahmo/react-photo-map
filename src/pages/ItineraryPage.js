@@ -105,30 +105,56 @@ function ItineraryPage() {
         };
       });
       
+      // First, try to get enhanced location information for each marker
+      const enhancedLocations = await Promise.all(
+        uniqueLocations.map(async location => {
+          try {
+            // Generate additional context for the location
+            const locationInfo = await openAIService.generateLocationFromImage(
+              location.photoUrl,
+              location.latitude,
+              location.longitude
+            );
+            
+            return {
+              ...location,
+              enhancedInfo: locationInfo
+            };
+          } catch (err) {
+            console.error(`Error getting enhanced location info: ${err.message}`);
+            return location;
+          }
+        })
+      );
+      
       // Get itinerary from OpenAI
-      const generatedItinerary = await openAIService.generateItinerary(uniqueLocations);
+      const generatedItinerary = await openAIService.generateItinerary(enhancedLocations);
       
       // Format the itinerary for display
       const formattedItinerary = {
         title: "Your Travel Journal",
-        locations: uniqueLocations.map((location, index) => {
+        locations: enhancedLocations.map((location, index) => {
           // Find AI-generated content for this location
           const aiData = generatedItinerary.days?.[index] || null;
+          const enhancedData = location.enhancedInfo || null;
           
           return {
             id: index,
-            name: aiData?.location || location.name,
+            name: aiData?.location || enhancedData?.locationName || location.name,
             coordinates: [location.latitude, location.longitude],
             photoUrl: location.photoUrl,
             date: getDateString(location.timestamp),
             photoCount: location.count,
-            description: aiData?.description || "A place you visited",
+            description: aiData?.description || enhancedData?.description || "A place you visited",
+            vibeDescription: enhancedData?.vibeDescription || "",
             historicalContext: aiData?.historicalContext || "",
-            activities: aiData?.activities || [],
+            pointsOfInterest: enhancedData?.pointsOfInterest || [],
+            recommendedActivities: enhancedData?.recommendedActivities || aiData?.activities || [],
+            localSpecialties: enhancedData?.localSpecialties || [],
             diningRecommendations: aiData?.diningRecommendations || [],
             accommodationTips: aiData?.accommodationTips || "",
             transportationTips: aiData?.transportationTips || "",
-            timeToSpend: aiData?.timeToSpend || "Unknown"
+            timeToSpend: aiData?.timeToSpend || "Varies based on your interests"
           };
         })
       };
@@ -189,8 +215,15 @@ function ItineraryPage() {
                       
                       <div className="description">
                         <h4>About This Place</h4>
-                        <p>{location.description}</p>
+                        <p>{location.description || "A fascinating location worth exploring."}</p>
                       </div>
+                      
+                      {location.vibeDescription && (
+                        <div className="vibe-description">
+                          <h4>Atmosphere & Vibe</h4>
+                          <p>{location.vibeDescription}</p>
+                        </div>
+                      )}
                       
                       {location.historicalContext && (
                         <div className="historical-context">
@@ -199,18 +232,40 @@ function ItineraryPage() {
                         </div>
                       )}
                       
-                      {location.activities.length > 0 && (
-                        <div className="activities">
-                          <h4>Activities</h4>
+                      {(location.pointsOfInterest && location.pointsOfInterest.length > 0) && (
+                        <div className="points-of-interest">
+                          <h4>Points of Interest</h4>
                           <ul className="detailed-list">
-                            {location.activities.map((activity, idx) => (
+                            {location.pointsOfInterest.map((poi, idx) => (
+                              <li key={idx}>{poi}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {(location.recommendedActivities && location.recommendedActivities.length > 0) && (
+                        <div className="activities">
+                          <h4>Recommended Activities</h4>
+                          <ul className="detailed-list">
+                            {location.recommendedActivities.map((activity, idx) => (
                               <li key={idx}>{activity}</li>
                             ))}
                           </ul>
                         </div>
                       )}
                       
-                      {location.diningRecommendations && location.diningRecommendations.length > 0 && (
+                      {(location.localSpecialties && location.localSpecialties.length > 0) && (
+                        <div className="local-specialties">
+                          <h4>Local Specialties</h4>
+                          <ul className="detailed-list">
+                            {location.localSpecialties.map((specialty, idx) => (
+                              <li key={idx}>{specialty}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {(location.diningRecommendations && location.diningRecommendations.length > 0) && (
                         <div className="dining">
                           <h4>Where to Eat</h4>
                           <ul>
