@@ -249,9 +249,7 @@ class OpenAIService {
     };
   }
 
-  // Add this method to the OpenAIService class in src/utils/openAIUtils.js
-
-async generateTravelStory(storyPoints) {
+  async generateTravelStory(storyPoints) {
     try {
       // Validate API key
       if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
@@ -305,7 +303,7 @@ async generateTravelStory(storyPoints) {
       return this.generateFallbackTravelStory(storyPoints);
     }
   }
-  
+
   generateFallbackTravelStory(storyPoints) {
     // Basic fallback story when API generation fails
     return {

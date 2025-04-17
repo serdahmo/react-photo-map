@@ -1,0 +1,215 @@
+/* src/styles/map-decorations.css */
+.map-decoration-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  
+  .map-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+  
+  /* Map Color Schemes */
+  .urban-map .map-background {
+    background-color: #f0f0f0;
+  }
+  
+  .coastal-map .map-background {
+    background-color: #e6f2ff;
+  }
+  
+  .nature-map .map-background {
+    background-color: #f0f7e6;
+  }
+  
+  .desert-map .map-background {
+    background-color: #f7f2e6;
+  }
+  
+  .winter-map .map-background {
+    background-color: #f5faff;
+  }
+  
+  .historic-map .map-background {
+    background-color: #f5f0e6;
+  }
+  
+  /* Map Grid Lines */
+  .map-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .grid-line {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .horizontal {
+    width: 100%;
+    height: 1px;
+  }
+  
+  .vertical {
+    height: 100%;
+    width: 1px;
+  }
+  
+  .line-1 {
+    top: 25%;
+    left: 25%;
+  }
+  
+  .line-2 {
+    top: 50%;
+    left: 50%;
+  }
+  
+  .line-3 {
+    top: 75%;
+    left: 75%;
+  }
+  
+  /* Map Pins */
+  .map-pin {
+    position: absolute;
+    transform: translate(-50%, -100%);
+  }
+  
+  .main-pin {
+    top: 50%;
+    left: 50%;
+    z-index: 3;
+  }
+  
+  .pin-head {
+    width: 20px;
+    height: 20px;
+    background-color: #e74c3c;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .pin-head.small {
+    width: 12px;
+    height: 12px;
+    background-color: #3498db;
+  }
+  
+  .pin-shadow {
+    width: 14px;
+    height: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    transform: translateY(5px);
+    margin: 0 auto;
+  }
+  
+  .urban-map .pin-head {
+    background-color: #3498db;
+  }
+  
+  .coastal-map .pin-head {
+    background-color: #1abc9c;
+  }
+  
+  .nature-map .pin-head {
+    background-color: #2ecc71;
+  }
+  
+  .desert-map .pin-head {
+    background-color: #e67e22;
+  }
+  
+  .winter-map .pin-head {
+    background-color: #9b59b6;
+  }
+  
+  .historic-map .pin-head {
+    background-color: #d35400;
+  }
+  
+  /* Compass Rose */
+  .compass-rose {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 10px;
+    opacity: 0.6;
+  }
+  
+  .compass-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  .compass-n, .compass-e, .compass-s, .compass-w {
+    position: absolute;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .compass-n {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .compass-e {
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  
+  .compass-s {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .compass-w {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+  
+  /* Location Label */
+  .location-label {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.7);
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }

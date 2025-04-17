@@ -2,13 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import openAIService from '../utils/openAIUtils';
+import MapStyleDecorations from '../components/MapStyleDecorations';
 import '../styles/blog-itinerary.css';
+import '../styles/map-decorations.css';
 
 function BlogStyleItinerary() {
   const [markers, setMarkers] = useState([]);
   const [travelStory, setTravelStory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState(null);
   
   // Get markers from localStorage
   useEffect(() => {
@@ -92,18 +96,6 @@ function BlogStyleItinerary() {
     });
   };
   
-  const formatTime = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(timestamp);
-    
-    // Format: "3:45 PM"
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-  
   const generateTravelStory = async () => {
     setLoading(true);
     setError(null);
@@ -121,7 +113,6 @@ function BlogStyleItinerary() {
           longitude: representative.longitude,
           timestamp: representative.timestamp,
           date: formatDate(representative.timestamp),
-          time: formatTime(representative.timestamp),
           photos: group.map(marker => ({
             url: marker.imageUrl,
             name: marker.fileName || "Photo",
@@ -196,6 +187,90 @@ function BlogStyleItinerary() {
     }
   };
   
+  const handleShareToInstagram = (chapter) => {
+    setSelectedChapter(chapter);
+    setShowInstagramModal(true);
+  };
+  
+  const handleCopyCaption = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Caption copied to clipboard!');
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  };
+  
+  const InstagramContentModal = ({ chapter, onClose }) => {
+    if (!chapter) return null;
+    
+    const featuredPhoto = chapter.photos.find(photo => photo.isFeatured);
+    const captionHashtags = "#travel #photography #travelstory #wanderlust #adventure";
+    const captionText = `Day ${chapter.dayNumber} of my journey: ${chapter.title}
+    
+${chapter.narrative.split('.')[0]}. ${chapter.narrative.split('.')[1] || ''}
+
+${captionHashtags}`;
+    
+    return (
+      <div className="instagram-modal-overlay" onClick={onClose}>
+        <div className="instagram-modal" onClick={e => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Instagram Content</h2>
+            <button className="close-button" onClick={onClose}>×</button>
+          </div>
+          
+          <div className="instagram-preview">
+            <h3>Post Preview</h3>
+            <div className="instagram-post-preview">
+              <img src={featuredPhoto?.url} alt="Featured location" />
+              <div className="instagram-overlay">
+                <div className="instagram-location">{chapter.location.name}</div>
+                <div className="instagram-caption-preview">"{featuredPhoto?.caption}"</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="instagram-caption">
+            <h3>Suggested Caption</h3>
+            <textarea
+              readOnly
+              value={captionText}
+            />
+            <button 
+              className="copy-caption-button"
+              onClick={() => handleCopyCaption(captionText)}
+            >
+              Copy Caption
+            </button>
+          </div>
+          
+          <div className="instagram-instructions">
+            <h3>How to Post</h3>
+            <ol>
+              <li>Save the image to your device</li>
+              <li>Open Instagram and create a new post</li>
+              <li>Select the saved image</li>
+              <li>Paste the caption</li>
+              <li>Tag the location as: {chapter.location.name}</li>
+              <li>Share and enjoy!</li>
+            </ol>
+          </div>
+          
+          <div className="modal-actions">
+            <a 
+              href={featuredPhoto?.url} 
+              download={`travel-day-${chapter.dayNumber}.jpg`}
+              className="download-image-button"
+            >
+              Download Image
+            </a>
+            <button className="cancel-button" onClick={onClose}>Close</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="blog-itinerary-page">
       <div className="page-header">
@@ -246,6 +321,14 @@ function BlogStyleItinerary() {
                     </div>
                     
                     <div className="chapter-content">
+                      {/* Map style decorations */}
+                      <div className="decoration-wrapper">
+                        <MapStyleDecorations 
+                          locationName={chapter.location.name} 
+                          description={chapter.location.description}
+                        />
+                      </div>
+                      
                       <div className="featured-photo">
                         {chapter.photos.filter(photo => photo.isFeatured).map((photo, index) => (
                           <img key={index} src={photo.url} alt={`Day ${chapter.dayNumber} featured`} />
@@ -270,18 +353,29 @@ function BlogStyleItinerary() {
                         </div>
                       )}
                       
-                      <div className="photo-gallery">
-                        {chapter.photos.filter(photo => !photo.isFeatured).map((photo, index) => (
-                          <div className="gallery-item" key={index}>
-                            <img src={photo.url} alt={`Travel moment ${index + 1}`} />
-                            <p className="photo-caption">{photo.caption}</p>
-                          </div>
-                        ))}
-                      </div>
+                      {chapter.photos.filter(photo => !photo.isFeatured).length > 0 && (
+                        <div className="photo-gallery">
+                          {chapter.photos.filter(photo => !photo.isFeatured).map((photo, index) => (
+                            <div className="gallery-item" key={index}>
+                              <img src={photo.url} alt={`Travel moment ${index + 1}`} />
+                              <p className="photo-caption">{photo.caption}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       
                       <div className="chapter-reflections">
                         <h3>Reflections</h3>
                         <p>{chapter.reflections}</p>
+                      </div>
+                      
+                      <div className="chapter-actions">
+                        <button 
+                          className="create-instagram-button"
+                          onClick={() => handleShareToInstagram(chapter)}
+                        >
+                          Create Instagram Post
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -295,12 +389,19 @@ function BlogStyleItinerary() {
               
               <div className="story-actions">
                 <button className="share-button">Share Story</button>
-                <button className="print-button">Print Story</button>
+                <button className="print-button" onClick={() => window.print()}>Print Story</button>
                 <button className="edit-button">Edit Story</button>
               </div>
             </div>
           )}
         </div>
+      )}
+      
+      {showInstagramModal && (
+        <InstagramContentModal 
+          chapter={selectedChapter}
+          onClose={() => setShowInstagramModal(false)}
+        />
       )}
     </div>
   );

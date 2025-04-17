@@ -12,7 +12,7 @@ function Navbar() {
       <ul className="nav-links">
         <li><NavLink to="/" end>Home</NavLink></li>
         <li><NavLink to="/map">My Map</NavLink></li>
-        <li><NavLink to="/itinerary">Travel Story</NavLink></li>
+        <li><NavLink to="/itinerary">Travel Story</NavLink></li> {/* Updated text to reflect the blog style */}
         <li><NavLink to="/recommendations">Recommendations</NavLink></li>
       </ul>
     </nav>
