@@ -248,6 +248,90 @@ class OpenAIService {
       budgetConsiderations: "Costs can vary widely based on accommodation choices, dining preferences, and activities. Research current prices for your specific destination and travel style."
     };
   }
+
+  // Add this method to the OpenAIService class in src/utils/openAIUtils.js
+
+async generateTravelStory(storyPoints) {
+    try {
+      // Validate API key
+      if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
+        return this.generateFallbackTravelStory(storyPoints);
+      }
+      
+      // Format location points for the prompt
+      const locationDetails = storyPoints.map((point, index) => {
+        const date = point.date || `Day ${index + 1}`;
+        const location = point.locationInfo?.locationName || "Unknown location";
+        const photoCount = point.photos?.length || 0;
+        
+        return `
+          - Location ${index + 1}: ${location}
+          - Date: ${date}
+          - Coordinates: ${point.latitude.toFixed(4)}, ${point.longitude.toFixed(4)}
+          - Number of photos: ${photoCount}
+          - Description: ${point.locationInfo?.description || "No description available"}
+        `;
+      }).join("\n");
+      
+      const prompt = `Create a personal travel blog/journal based on these locations from my trip:
+      
+      ${locationDetails}
+      
+      I want a narrative first-person story that feels like a personal travel blog with emotional reflections and storytelling elements. Imagine you're me writing about my journey through these places.
+      
+      Respond with VALID JSON in this exact format:
+      {
+        "title": "An engaging, creative title for my travel story",
+        "subtitle": "A brief, evocative subtitle",
+        "introduction": "A personal introduction paragraph about the overall journey (150-200 words)",
+        "chapters": [
+          {
+            "title": "Creative title for this location/day",
+            "narrative": "First-person narrative about this day/location (300-400 words). Include vivid descriptions, personal feelings, and memorable moments. Make it feel like a personal journal entry with emotional depth.",
+            "highlights": ["Highlight 1 with thoughtful commentary", "Highlight 2 with thoughtful commentary", "Highlight 3 with thoughtful commentary"],
+            "reflections": "Personal reflection paragraph looking back on this part of the journey (100-150 words)",
+            "photoCaptions": ["Evocative caption for photo 1", "Evocative caption for photo 2"]
+          }
+        ],
+        "conclusion": "Thoughtful closing paragraph about the journey as a whole (150-200 words)"
+      }`;
+      
+      const systemPrompt = "You are a talented travel writer who creates engaging, personal travel stories in a blog/journal style. You write vivid first-person narratives with emotional depth, insightful reflections, and storytelling elements. Your writing sounds authentic and personal, like someone sharing their travel experiences with friends.";
+      
+      const result = await this.generateText(prompt, systemPrompt, 0.7);
+      return JSON.parse(result);
+    } catch (error) {
+      console.error("Failed to generate travel story:", error);
+      return this.generateFallbackTravelStory(storyPoints);
+    }
+  }
+  
+  generateFallbackTravelStory(storyPoints) {
+    // Basic fallback story when API generation fails
+    return {
+      title: "My Photographic Journey",
+      subtitle: "Capturing Moments and Memories",
+      introduction: "This journey began as a simple adventure but transformed into something much more meaningful. Through the lens of my camera, I captured not just places, but moments and emotions that tell the story of this incredible experience.",
+      chapters: storyPoints.map((point, index) => {
+        const locationName = point.locationInfo?.locationName || "This fascinating place";
+        
+        return {
+          title: `Day ${index + 1}: Exploring ${locationName}`,
+          narrative: `Today's adventure took me to ${locationName}, where each moment offered something new to discover. The journey itself was as memorable as the destination, with scenic views and unexpected encounters along the way. Once I arrived, I was immediately struck by the unique character of this place - something that photos can capture but never fully convey. I spent time wandering through the area, camera in hand, trying to preserve these experiences through my lens. Some moments were planned, while others were beautiful surprises that happened when I least expected them.`,
+          highlights: [
+            "The incredible scenery that surrounded me throughout the day",
+            "Interactions with locals that gave me insight into the authentic culture",
+            "Quiet moments of reflection that made this journey special"
+          ],
+          reflections: "Looking back on this day, I'm grateful for both the planned experiences and the unexpected moments. There's something powerful about exploring new places and preserving those memories through photography.",
+          photoCaptions: point.photos?.map((_, photoIndex) => 
+            `A captured moment from my journey through ${locationName}`
+          ) || []
+        };
+      }),
+      conclusion: "As this journey comes to a close, I find myself looking through these photos with a sense of gratitude. Each image represents more than just a place - it captures a feeling, a moment, a memory that now becomes part of my story. While the journey itself has ended, these memories and experiences have become a part of who I am, and I carry them forward into whatever adventure comes next."
+    };
+  }
 }
 
 // Create and export a singleton instance

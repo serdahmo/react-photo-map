@@ -8,6 +8,8 @@ import HomePage from './pages/HomePage';
 import MapPage from './pages/MapPage';
 import ItineraryPage from './pages/ItineraryPage';
 import RecommendationsPage from './pages/RecommendationsPage';
+import BlogStyleItinerary from './pages/BlogStyleItinerary';
+import './styles/blog-itinerary.css';
 
 function App() {
   return (
@@ -18,7 +20,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/map" element={<MapPage />} />
-            <Route path="/itinerary" element={<ItineraryPage />} />
+            <Route path="/itinerary" element={<BlogStyleItinerary />} />
             <Route path="/recommendations" element={<RecommendationsPage />} />
             {/* Add a catch-all route that redirects to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
