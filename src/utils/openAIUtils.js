@@ -1,5 +1,6 @@
 // src/utils/openAIUtils.js
 import analyzeCoordinates from './locationAnalyzer';
+import analyzeImageWithVision from './visionAnalyzer';
 
 // Get API key from environment variable
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -24,7 +25,7 @@ class OpenAIService {
           "Authorization": `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4-turbo", // Updated to latest model
           messages: [
             {
               role: "system",
@@ -36,7 +37,7 @@ class OpenAIService {
             }
           ],
           temperature: temperature,
-          max_tokens: 2000 // Increased for longer responses
+          max_tokens: 2000
         })
       });
 
@@ -58,42 +59,59 @@ class OpenAIService {
     }
   }
 
-  async generateLocationFromImage(imageUrl, latitude, longitude) {
+  async generateLocationFromImage(imageUrl, latitude, longitude, filename = "") {
     try {
-      // Use local analysis if API key issues
-      if (!this.apiKey || this.apiKey === "your-api-key-here" || this.apiKey.trim() === "") {
-        return this.generateFallbackLocationInfo(latitude, longitude);
+      // First, attempt to analyze the image using vision
+      try {
+        const visionAnalysis = await analyzeImageWithVision(imageUrl);
+        return {
+          locationName: visionAnalysis.locationName,
+          description: visionAnalysis.narrative,
+          vibeDescription: "The atmosphere was captivating, creating a sense of immersion that transported me completely into the moment.",
+          pointsOfInterest: visionAnalysis.highlights.map(highlight => highlight.split(':')[0] || highlight),
+          recommendedActivities: visionAnalysis.highlights.map(highlight => 
+            `Experiencing ${highlight.split(':')[0] || highlight}`
+          ),
+          localSpecialties: [
+            "Signature flavors that define this location",
+            "Cultural traditions passed down through generations",
+            "Artistic expressions unique to this place and moment"
+          ]
+        };
+      } catch (visionError) {
+        console.error("Vision analysis failed, falling back to API text completion:", visionError);
+        
+        // If vision fails, continue with the standard text-based API
+        const prompt = `I have a photo taken at coordinates: ${latitude}, ${longitude}. 
+        If these coordinates don't clearly identify a specific named location, please analyze the general region and:
+        
+        1. Provide a description of what the region is likely to be (coastal area, mountains, urban environment, etc.)
+        2. Suggest what this place might be based on its geographic position
+        3. Describe activities and points of interest that would typically be found in this type of location or region
+        
+        Respond with VALID JSON in this exact format:
+        {
+          "locationName": "Best guess at location name or descriptive label (e.g., 'Coastal Town in Southern Italy' or 'Mountain Region in the Alps')",
+          "description": "Detailed description based on the coordinates and regional characteristics (at least 150 words)",
+          "vibeDescription": "Description of the atmosphere/vibe of this type of place",
+          "pointsOfInterest": ["Nearby attraction 1 with description", "Nearby attraction 2 with description", "Nearby attraction 3 with description"],
+          "recommendedActivities": ["Activity 1 appropriate for this region", "Activity 2", "Activity 3"],
+          "localSpecialties": ["Food/cultural item 1 typical of this region", "Food/cultural item 2", "Food/cultural item 3"]
+        }`;
+        
+        const systemPrompt = "You are a travel expert with extensive knowledge of global geography. When given coordinates, identify the location as specifically as possible, or if precise identification isn't possible, provide rich, descriptive information about the general region and what travelers might expect there. Always respond with valid JSON only.";
+        
+        const result = await this.generateText(prompt, systemPrompt, 0.8);
+        return JSON.parse(result);
       }
-      
-      const prompt = `I have a photo taken at coordinates: ${latitude}, ${longitude}. 
-      If these coordinates don't clearly identify a specific named location, please analyze the general region and:
-      
-      1. Provide a description of what the region is likely to be (coastal area, mountains, urban environment, etc.)
-      2. Suggest what this place might be based on its geographic position
-      3. Describe activities and points of interest that would typically be found in this type of location or region
-      
-      Respond with VALID JSON in this exact format:
-      {
-        "locationName": "Best guess at location name or descriptive label (e.g., 'Coastal Town in Southern Italy' or 'Mountain Region in the Alps')",
-        "description": "Detailed description based on the coordinates and regional characteristics (at least 150 words)",
-        "vibeDescription": "Description of the atmosphere/vibe of this type of place",
-        "pointsOfInterest": ["Nearby attraction 1 with description", "Nearby attraction 2 with description", "Nearby attraction 3 with description"],
-        "recommendedActivities": ["Activity 1 appropriate for this region", "Activity 2", "Activity 3"],
-        "localSpecialties": ["Food/cultural item 1 typical of this region", "Food/cultural item 2", "Food/cultural item 3"]
-      }`;
-      
-      const systemPrompt = "You are a travel expert with extensive knowledge of global geography. When given coordinates, identify the location as specifically as possible, or if precise identification isn't possible, provide rich, descriptive information about the general region and what travelers might expect there. Always respond with valid JSON only.";
-      
-      const result = await this.generateText(prompt, systemPrompt, 0.8);
-      return JSON.parse(result);
     } catch (error) {
-      console.error("Failed to analyze location:", error);
-      return this.generateFallbackLocationInfo(latitude, longitude);
+      console.error("Failed to analyze location, using fallback:", error);
+      return this.generateFallbackLocationInfo(latitude, longitude, filename);
     }
   }
 
-  generateFallbackLocationInfo(latitude, longitude) {
-    // Use our local analyzer to get location info
+  generateFallbackLocationInfo(latitude, longitude, filename = "") {
+    // Use our local analyzer for a last resort fallback
     const analysis = analyzeCoordinates(latitude, longitude);
     
     return {

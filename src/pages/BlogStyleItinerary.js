@@ -13,6 +13,7 @@ function BlogStyleItinerary() {
   const [error, setError] = useState(null);
   const [showInstagramModal, setShowInstagramModal] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState(null);
+  const [processingProgress, setProcessingProgress] = useState(0);
   
   // Get markers from localStorage
   useEffect(() => {
@@ -99,6 +100,7 @@ function BlogStyleItinerary() {
   const generateTravelStory = async () => {
     setLoading(true);
     setError(null);
+    setProcessingProgress(0);
     
     try {
       // Group markers by location and date
@@ -121,28 +123,54 @@ function BlogStyleItinerary() {
         };
       });
       
-      // Get enhanced location information for each story point
-      const enrichedStoryPoints = await Promise.all(
-        storyPoints.map(async (point, index) => {
-          try {
-            // Generate additional context for the location
-            const locationInfo = await openAIService.generateLocationFromImage(
-              point.photos[0].url,
-              point.latitude,
-              point.longitude
-            );
-            
-            return {
-              ...point,
-              locationInfo,
-              dayNumber: index + 1
-            };
-          } catch (err) {
-            console.error(`Error getting location info: ${err.message}`);
-            return point;
+      // Process story points in sequence with progress tracking
+      const totalPoints = storyPoints.length;
+      const enrichedStoryPoints = [];
+      
+      for (let i = 0; i < storyPoints.length; i++) {
+        const point = storyPoints[i];
+        try {
+          // Update progress
+          setProcessingProgress(Math.floor((i / totalPoints) * 100));
+          
+          // Generate additional context for the location
+          // Add a delay between API calls to avoid rate limiting
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
-        })
-      );
+          
+          const locationInfo = await openAIService.generateLocationFromImage(
+            point.photos[0].url,
+            point.latitude,
+            point.longitude,
+            point.photos[0].name || "" // Pass the filename for better context
+          );
+          
+          enrichedStoryPoints.push({
+            ...point,
+            locationInfo,
+            dayNumber: i + 1
+          });
+        } catch (err) {
+          console.error(`Error getting location info for point ${i}:`, err);
+          // Still add the point with whatever info we have
+          enrichedStoryPoints.push({
+            ...point,
+            locationInfo: {
+              locationName: `Location ${i + 1}`,
+              description: "A place visited during my journey.",
+              vibeDescription: "A place with its own unique character and atmosphere.",
+              pointsOfInterest: [],
+              recommendedActivities: [],
+              localSpecialties: []
+            },
+            dayNumber: i + 1
+          });
+        }
+      }
+      
+      // Update progress to show we're generating the final story
+      setProcessingProgress(90);
       
       // Generate the narrative travel story
       const generatedStory = await openAIService.generateTravelStory(enrichedStoryPoints);
@@ -179,6 +207,7 @@ function BlogStyleItinerary() {
       };
       
       setTravelStory(formattedStory);
+      setProcessingProgress(100);
     } catch (err) {
       console.error('Error generating travel story:', err);
       setError('Failed to generate your travel story. Please try again later.');
@@ -295,6 +324,18 @@ ${captionHashtags}`;
               >
                 {loading ? 'Creating Your Story...' : 'Create My Travel Story'}
               </button>
+              
+              {loading && (
+                <div className="processing-status">
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-bar-fill" 
+                      style={{width: `${processingProgress}%`}}
+                    ></div>
+                  </div>
+                  <p>Processing photos: {processingProgress}% complete</p>
+                </div>
+              )}
               
               {error && <p className="error-message">{error}</p>}
             </>
