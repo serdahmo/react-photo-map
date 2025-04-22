@@ -1,0 +1,355 @@
+/* src/styles/social-sharing.css */
+.social-sharing {
+    margin: 20px 0;
+  }
+  
+  .share-button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .share-button:before {
+    content: "🔗";
+  }
+  
+  .share-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Modal Styles */
+  .share-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+  }
+  
+  .share-modal {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #777;
+    padding: 0;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .close-button:hover {
+    background-color: #f5f5f5;
+    color: #333;
+  }
+  
+  /* Platform Selection */
+  .platform-selection h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+  }
+  
+  .platform-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 15px 10px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .platform-option:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-3px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .platform-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .platform-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* Sharing Options */
+  .sharing-options h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .media-selection h4, 
+  .content-section h4 {
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  
+  .images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .image-option {
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .image-option:hover {
+    transform: scale(1.05);
+  }
+  
+  .image-option.selected {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.5);
+  }
+  
+  .image-option img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .title-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    margin-bottom: 5px;
+  }
+  
+  .character-count {
+    text-align: right;
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 15px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .back-button, 
+  .share-now-button {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .back-button {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
+  }
+  
+  .back-button:hover {
+    background-color: #e1e1e1;
+  }
+  
+  .share-now-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+  }
+  
+  .share-now-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Instagram Instructions */
+  .instagram-instructions h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .instagram-instructions h4 {
+    font-size: 15px;
+    margin: 15px 0 10px;
+    color: #555;
+  }
+  
+  .preview-image {
+    width: 100%;
+    aspect-ratio: 1/1;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .copy-text-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .copy-text-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .manual-steps ol {
+    padding-left: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .manual-steps li {
+    margin-bottom: 8px;
+    color: #555;
+  }
+  
+  .download-button {
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+    width: 100%;
+  }
+  
+  .download-button:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .download-button:disabled {
+    background-color: #95e1b7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .platforms-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .images-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .back-button, 
+    .share-now-button {
+      width: 100%;
+    }
+  }

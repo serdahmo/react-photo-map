@@ -1,4 +1,4 @@
-// src/pages/BlogStyleItinerary.js
+// src/pages/BlogStyleItinerary.js - Updated for integrated layout
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import openAIService from '../utils/openAIUtils';
@@ -11,26 +11,43 @@ function BlogStyleItinerary() {
   const [travelStory, setTravelStory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showInstagramModal, setShowInstagramModal] = useState(false);
+  const [showSocialModal, setShowSocialModal] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [processingProgress, setProcessingProgress] = useState(0);
   
-  // Get markers from localStorage
+  // Get markers from localStorage or IndexedDB if available
   useEffect(() => {
-    const savedMarkers = localStorage.getItem('photoMarkers');
-    if (savedMarkers) {
+    const loadMarkers = async () => {
       try {
-        const parsedMarkers = JSON.parse(savedMarkers);
-        // Sort markers by timestamp if available
-        const sortedMarkers = [...parsedMarkers].sort((a, b) => {
-          return (a.timestamp || 0) - (b.timestamp || 0);
-        });
-        setMarkers(sortedMarkers);
+        // Check if we have IndexedDB storage available
+        if (typeof window.indexedDBService !== 'undefined') {
+          const dbMarkers = await window.indexedDBService.getAllPhotos();
+          if (dbMarkers && dbMarkers.length > 0) {
+            const sortedMarkers = [...dbMarkers].sort((a, b) => 
+              (a.timestamp || 0) - (b.timestamp || 0)
+            );
+            setMarkers(sortedMarkers);
+            return;
+          }
+        }
+        
+        // Fall back to localStorage if IndexedDB not available or empty
+        const savedMarkers = localStorage.getItem('photoMarkers');
+        if (savedMarkers) {
+          const parsedMarkers = JSON.parse(savedMarkers);
+          // Sort markers by timestamp if available
+          const sortedMarkers = [...parsedMarkers].sort((a, b) => 
+            (a.timestamp || 0) - (b.timestamp || 0)
+          );
+          setMarkers(sortedMarkers);
+        }
       } catch (err) {
-        console.error('Error parsing markers from localStorage:', err);
+        console.error('Error loading photos:', err);
         setError('Failed to load your saved photos');
       }
-    }
+    };
+    
+    loadMarkers();
   }, []);
   
   // Group markers by approximate location (within 1km) and date
@@ -216,9 +233,9 @@ function BlogStyleItinerary() {
     }
   };
   
-  const handleShareToInstagram = (chapter) => {
+  const handleShareToSocial = (chapter) => {
     setSelectedChapter(chapter);
-    setShowInstagramModal(true);
+    setShowSocialModal(true);
   };
   
   const handleCopyCaption = (text) => {
@@ -229,7 +246,8 @@ function BlogStyleItinerary() {
     });
   };
   
-  const InstagramContentModal = ({ chapter, onClose }) => {
+  // Social sharing modal with Instagram and other options
+  const SocialSharingModal = ({ chapter, onClose }) => {
     if (!chapter) return null;
     
     const featuredPhoto = chapter.photos.find(photo => photo.isFeatured);
@@ -244,7 +262,7 @@ ${captionHashtags}`;
       <div className="instagram-modal-overlay" onClick={onClose}>
         <div className="instagram-modal" onClick={e => e.stopPropagation()}>
           <div className="modal-header">
-            <h2>Instagram Content</h2>
+            <h2>Share to Social Media</h2>
             <button className="close-button" onClick={onClose}>×</button>
           </div>
           
@@ -274,14 +292,14 @@ ${captionHashtags}`;
           </div>
           
           <div className="instagram-instructions">
-            <h3>How to Post</h3>
+            <h3>How to Share</h3>
             <ol>
               <li>Save the image to your device</li>
-              <li>Open Instagram and create a new post</li>
-              <li>Select the saved image</li>
+              <li>Open your preferred social media app</li>
+              <li>Create a new post and select the saved image</li>
               <li>Paste the caption</li>
               <li>Tag the location as: {chapter.location.name}</li>
-              <li>Share and enjoy!</li>
+              <li>Share with your followers!</li>
             </ol>
           </div>
           
@@ -370,53 +388,85 @@ ${captionHashtags}`;
                         />
                       </div>
                       
-                      <div className="featured-photo">
-                        {chapter.photos.filter(photo => photo.isFeatured).map((photo, index) => (
-                          <img key={index} src={photo.url} alt={`Day ${chapter.dayNumber} featured`} />
-                        ))}
-                        <div className="location-badge">
-                          <span className="location-name">{chapter.location.name}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="chapter-narrative">
-                        <p>{chapter.narrative}</p>
-                      </div>
-                      
-                      {chapter.highlights.length > 0 && (
-                        <div className="chapter-highlights">
-                          <h3>Highlights</h3>
-                          <ul>
-                            {chapter.highlights.map((highlight, index) => (
-                              <li key={index}>{highlight}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {chapter.photos.filter(photo => !photo.isFeatured).length > 0 && (
-                        <div className="photo-gallery">
-                          {chapter.photos.filter(photo => !photo.isFeatured).map((photo, index) => (
-                            <div className="gallery-item" key={index}>
-                              <img src={photo.url} alt={`Travel moment ${index + 1}`} />
-                              <p className="photo-caption">{photo.caption}</p>
+                      {/* Integrated layout with same-sized images and flowing text */}
+                      <div className="article-content">
+                        {/* Main narrative section */}
+                        <div className="narrative-section">
+                          {/* Featured photo - same size as secondary photos */}
+                          {chapter.photos.filter(photo => photo.isFeatured).length > 0 && (
+                            <div className="travel-image right">
+                              <div style={{ position: 'relative' }}>
+                                <img 
+                                  src={chapter.photos.find(photo => photo.isFeatured).url} 
+                                  alt={`Day ${chapter.dayNumber} featured`} 
+                                />
+                                <div className="location-badge">
+                                  <span className="location-name">{chapter.location.name}</span>
+                                </div>
+                              </div>
                             </div>
-                          ))}
+                          )}
+                          
+                          {/* Narrative text */}
+                          <div className="text-content">
+                            <div className="chapter-narrative">
+                              <p>{chapter.narrative}</p>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      
-                      <div className="chapter-reflections">
-                        <h3>Reflections</h3>
-                        <p>{chapter.reflections}</p>
-                      </div>
-                      
-                      <div className="chapter-actions">
-                        <button 
-                          className="create-instagram-button"
-                          onClick={() => handleShareToInstagram(chapter)}
-                        >
-                          Create Instagram Post
-                        </button>
+                        
+                        {/* Highlights section */}
+                        {chapter.highlights.length > 0 && (
+                          <div className="chapter-highlights">
+                            <h3>Highlights</h3>
+                            <ul>
+                              {chapter.highlights.map((highlight, index) => (
+                                <li key={index}>{highlight}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Secondary photo and caption with text if there are non-featured photos */}
+                        {chapter.photos.filter(photo => !photo.isFeatured).length > 0 && (
+                          <div className="narrative-section">
+                            <div className="travel-image left">
+                              <img 
+                                src={chapter.photos.filter(photo => !photo.isFeatured)[0].url} 
+                                alt={`Travel moment`} 
+                              />
+                              <div className="image-caption">
+                                {chapter.photos.filter(photo => !photo.isFeatured)[0].caption}
+                              </div>
+                            </div>
+                            
+                            {/* Reflections section next to secondary image */}
+                            <div className="text-content">
+                              <div className="chapter-reflections">
+                                <h3>Reflections</h3>
+                                <p>{chapter.reflections}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Just show reflections if no secondary image */}
+                        {chapter.photos.filter(photo => !photo.isFeatured).length === 0 && (
+                          <div className="chapter-reflections">
+                            <h3>Reflections</h3>
+                            <p>{chapter.reflections}</p>
+                          </div>
+                        )}
+                        
+                        {/* Sharing actions */}
+                        <div className="chapter-actions">
+                          <button 
+                            className="create-instagram-button"
+                            onClick={() => handleShareToSocial(chapter)}
+                          >
+                            Share on Social Media
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -438,10 +488,10 @@ ${captionHashtags}`;
         </div>
       )}
       
-      {showInstagramModal && (
-        <InstagramContentModal 
+      {showSocialModal && (
+        <SocialSharingModal
           chapter={selectedChapter}
-          onClose={() => setShowInstagramModal(false)}
+          onClose={() => setShowSocialModal(false)}
         />
       )}
     </div>
