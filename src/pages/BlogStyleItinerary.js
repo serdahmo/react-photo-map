@@ -1,4 +1,4 @@
-// src/pages/BlogStyleItinerary.js - Updated for integrated layout
+// src/pages/BlogStyleItinerary.js - Updated for top-bottom layout
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import openAIService from '../utils/openAIUtils';
@@ -233,7 +233,7 @@ function BlogStyleItinerary() {
     }
   };
   
-  const handleShareToSocial = (chapter) => {
+  const handleShareToInstagram = (chapter) => {
     setSelectedChapter(chapter);
     setShowSocialModal(true);
   };
@@ -246,8 +246,8 @@ function BlogStyleItinerary() {
     });
   };
   
-  // Social sharing modal with Instagram and other options
-  const SocialSharingModal = ({ chapter, onClose }) => {
+  // Instagram sharing modal
+  const InstagramSharingModal = ({ chapter, onClose }) => {
     if (!chapter) return null;
     
     const featuredPhoto = chapter.photos.find(photo => photo.isFeatured);
@@ -262,7 +262,7 @@ ${captionHashtags}`;
       <div className="instagram-modal-overlay" onClick={onClose}>
         <div className="instagram-modal" onClick={e => e.stopPropagation()}>
           <div className="modal-header">
-            <h2>Share to Social Media</h2>
+            <h2>Share to Instagram</h2>
             <button className="close-button" onClick={onClose}>×</button>
           </div>
           
@@ -295,7 +295,7 @@ ${captionHashtags}`;
             <h3>How to Share</h3>
             <ol>
               <li>Save the image to your device</li>
-              <li>Open your preferred social media app</li>
+              <li>Open Instagram</li>
               <li>Create a new post and select the saved image</li>
               <li>Paste the caption</li>
               <li>Tag the location as: {chapter.location.name}</li>
@@ -388,83 +388,78 @@ ${captionHashtags}`;
                         />
                       </div>
                       
-                      {/* Integrated layout with same-sized images and flowing text */}
+                      {/* UPDATED: Modified layout to show photos at the top and content below */}
                       <div className="article-content">
-                        {/* Main narrative section */}
-                        <div className="narrative-section">
-                          {/* Featured photo - same size as secondary photos */}
+                        {/* Photos Section - All photos shown at the top */}
+                        <div className="photos-section">
+                          {/* Featured photo */}
                           {chapter.photos.filter(photo => photo.isFeatured).length > 0 && (
-                            <div className="travel-image right">
-                              <div style={{ position: 'relative' }}>
-                                <img 
-                                  src={chapter.photos.find(photo => photo.isFeatured).url} 
-                                  alt={`Day ${chapter.dayNumber} featured`} 
-                                />
-                                <div className="location-badge">
-                                  <span className="location-name">{chapter.location.name}</span>
-                                </div>
+                            <div className="featured-photo">
+                              <img 
+                                src={chapter.photos.find(photo => photo.isFeatured).url} 
+                                alt={`Day ${chapter.dayNumber} featured`} 
+                              />
+                              <div className="location-badge">
+                                <span className="location-name">{chapter.location.name}</span>
+                              </div>
+                              <div className="image-caption">
+                                {chapter.photos.find(photo => photo.isFeatured).caption}
                               </div>
                             </div>
                           )}
                           
-                          {/* Narrative text */}
-                          <div className="text-content">
-                            <div className="chapter-narrative">
-                              <p>{chapter.narrative}</p>
+                          {/* Secondary photos */}
+                          {chapter.photos.filter(photo => !photo.isFeatured).length > 0 && (
+                            <div className="secondary-photos">
+                              {chapter.photos.filter(photo => !photo.isFeatured).map((photo, idx) => (
+                                <div className="secondary-photo" key={idx}>
+                                  <img 
+                                    src={photo.url} 
+                                    alt={`Travel moment ${idx + 1}`} 
+                                  />
+                                  <div className="image-caption">
+                                    {photo.caption}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          </div>
+                          )}
                         </div>
                         
-                        {/* Highlights section */}
-                        {chapter.highlights.length > 0 && (
-                          <div className="chapter-highlights">
-                            <h3>Highlights</h3>
-                            <ul>
-                              {chapter.highlights.map((highlight, index) => (
-                                <li key={index}>{highlight}</li>
-                              ))}
-                            </ul>
+                        {/* Text Content Section - Below photos */}
+                        <div className="text-section">
+                          {/* Narrative text */}
+                          <div className="chapter-narrative">
+                            <h3>The Journey</h3>
+                            <p>{chapter.narrative}</p>
                           </div>
-                        )}
-                        
-                        {/* Secondary photo and caption with text if there are non-featured photos */}
-                        {chapter.photos.filter(photo => !photo.isFeatured).length > 0 && (
-                          <div className="narrative-section">
-                            <div className="travel-image left">
-                              <img 
-                                src={chapter.photos.filter(photo => !photo.isFeatured)[0].url} 
-                                alt={`Travel moment`} 
-                              />
-                              <div className="image-caption">
-                                {chapter.photos.filter(photo => !photo.isFeatured)[0].caption}
-                              </div>
+                          
+                          {/* Highlights section */}
+                          {chapter.highlights.length > 0 && (
+                            <div className="chapter-highlights">
+                              <h3>Highlights</h3>
+                              <ul>
+                                {chapter.highlights.map((highlight, index) => (
+                                  <li key={index}>{highlight}</li>
+                                ))}
+                              </ul>
                             </div>
-                            
-                            {/* Reflections section next to secondary image */}
-                            <div className="text-content">
-                              <div className="chapter-reflections">
-                                <h3>Reflections</h3>
-                                <p>{chapter.reflections}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Just show reflections if no secondary image */}
-                        {chapter.photos.filter(photo => !photo.isFeatured).length === 0 && (
+                          )}
+                          
+                          {/* Reflections section */}
                           <div className="chapter-reflections">
                             <h3>Reflections</h3>
                             <p>{chapter.reflections}</p>
                           </div>
-                        )}
+                        </div>
                         
-                        {/* Sharing actions */}
+                        {/* Instagram sharing button */}
                         <div className="chapter-actions">
                           <button 
-                            className="create-instagram-button"
-                            onClick={() => handleShareToSocial(chapter)}
+                            className="share-to-instagram-button"
+                            onClick={() => handleShareToInstagram(chapter)}
                           >
-                            Share on Social Media
+                            Share to Instagram
                           </button>
                         </div>
                       </div>
@@ -489,7 +484,7 @@ ${captionHashtags}`;
       )}
       
       {showSocialModal && (
-        <SocialSharingModal
+        <InstagramSharingModal
           chapter={selectedChapter}
           onClose={() => setShowSocialModal(false)}
         />
