@@ -26,6 +26,37 @@ function ImageUploader({ onImagesLoaded }) {
         const lon = EXIF.getTag(this, 'GPSLongitude');
         const latRef = EXIF.getTag(this, 'GPSLatitudeRef') || 'N';
         const lonRef = EXIF.getTag(this, 'GPSLongitudeRef') || 'W';
+        
+        // Extract date information
+        let dateTime = EXIF.getTag(this, 'DateTimeOriginal') || 
+                       EXIF.getTag(this, 'DateTime') || 
+                       EXIF.getTag(this, 'CreateDate') ||
+                       null;
+        
+        // Parse the datetime string into a JavaScript Date object if it exists
+        let timestamp = null;
+        let formattedDateTime = null;
+        
+        if (dateTime) {
+          // EXIF DateTime format is typically: "YYYY:MM:DD HH:MM:SS"
+          // We need to convert it to: "YYYY-MM-DD HH:MM:SS" for JavaScript Date parsing
+          const dateStr = dateTime.replace(/:/g, '-').replace(/-/g, ':').replace(/:/g, '-', 2);
+          const parsedDate = new Date(dateStr);
+          
+          // Validate the date is actually valid (not Invalid Date)
+          if (!isNaN(parsedDate.getTime())) {
+            timestamp = parsedDate.getTime();
+            formattedDateTime = parsedDate.toLocaleString();
+          } else {
+            // Use file's last modified date if EXIF date is invalid
+            timestamp = file.lastModified;
+            formattedDateTime = new Date(timestamp).toLocaleString();
+          }
+        } else {
+          // If no EXIF date is found, use the file's last modified date as fallback
+          timestamp = file.lastModified;
+          formattedDateTime = new Date(timestamp).toLocaleString();
+        }
 
         processedCount++;
 
@@ -48,7 +79,8 @@ function ImageUploader({ onImagesLoaded }) {
             latitude,
             longitude,
             imageUrl,
-            timestamp: new Date().getTime()
+            timestamp,
+            dateTime: formattedDateTime
           });
         } else {
           console.warn(`No geolocation data found in ${file.name}`);

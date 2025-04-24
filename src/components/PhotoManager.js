@@ -23,37 +23,57 @@ function PhotoManager({ markers, onClearMarkers, onRemoveMarker }) {
   return (
     <div className="photo-manager">
       <div className="manager-header">
-        <h3>Manage Photos</h3>
-        <button 
-          className="clear-all-button" 
-          onClick={handleClearAll}
-        >
-          Clear All Photos
-        </button>
+        <h3>Your Photo Collection</h3>
+        <div className="manager-stats">
+          <span className="stat-item">
+            <span className="stat-icon">📷</span>
+            <span className="stat-value">{markers.length}</span>
+            <span className="stat-label">Photos</span>
+          </span>
+          <button 
+            className="clear-all-button" 
+            onClick={handleClearAll}
+          >
+            Clear All
+          </button>
+        </div>
       </div>
       
       <div className="photo-grid">
         {markers.map((marker, index) => (
-          <div className="photo-item" key={index}>
-            <div className="photo-thumbnail">
+          <div className="photo-card" key={index}>
+            <div className="photo-image">
               <img 
                 src={marker.imageUrl} 
                 alt={marker.fileName || `Photo ${index + 1}`} 
               />
+              <button 
+                className="remove-photo-button" 
+                onClick={() => handleRemovePhoto(index)}
+                title="Remove photo"
+              >
+                ×
+              </button>
             </div>
-            <div className="photo-info">
-              <p className="photo-name">{marker.fileName || `Photo ${index + 1}`}</p>
-              <p className="photo-coords">
-                {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
-              </p>
+            <div className="photo-details">
+              <h4 className="photo-name">{marker.fileName || `Photo ${index + 1}`}</h4>
+              <div className="photo-metadata">
+                <div className="metadata-item location">
+                  <span className="metadata-icon">📍</span>
+                  <span className="metadata-value">
+                    {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
+                  </span>
+                </div>
+                {marker.dateTime && (
+                  <div className="metadata-item date">
+                    <span className="metadata-icon">📅</span>
+                    <span className="metadata-value">
+                      {marker.dateTime}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-            <button 
-              className="remove-photo-button" 
-              onClick={() => handleRemovePhoto(index)}
-              title="Remove photo"
-            >
-              ×
-            </button>
           </div>
         ))}
       </div>

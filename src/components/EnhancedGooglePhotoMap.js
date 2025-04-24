@@ -1,5 +1,6 @@
+// src/components/EnhancedGooglePhotoMap.js
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, InfoWindow, MarkerClusterer } from '@react-google-maps/api';
 import '../styles/enhanced-map.css';
 
 const containerStyle = {
@@ -82,6 +83,14 @@ function EnhancedGooglePhotoMap({ markers }) {
     setMapType(e.target.value);
   };
 
+  // Options for marker clusters
+  const clusterOptions = {
+    imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+    gridSize: 50,
+    minimumClusterSize: 3,
+    averageCenter: true
+  };
+
   return (
     <div className="enhanced-map-container">
       <div className="map-controls">
@@ -99,7 +108,10 @@ function EnhancedGooglePhotoMap({ markers }) {
         </div>
       </div>
 
-      <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
+      <LoadScript 
+        googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
+        libraries={["visualization"]}
+      >
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={center}
@@ -110,25 +122,47 @@ function EnhancedGooglePhotoMap({ markers }) {
           options={{
             mapTypeControl: false, // We're handling this ourselves
             streetViewControl: true,
-            fullscreenControl: true
+            fullscreenControl: true,
+            styles: [
+              {
+                featureType: "all",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#333333" }]
+              },
+              {
+                featureType: "landscape",
+                elementType: "all",
+                stylers: [{ color: "#f5f5f5" }]
+              },
+              {
+                featureType: "water",
+                elementType: "all",
+                stylers: [{ color: "#c8e9ff" }]
+              }
+            ]
           }}
         >
-          {/* Create a marker for each photo location */}
-          {markers.map((marker, index) => (
-            <Marker
-              key={index}
-              position={{
-                lat: marker.latitude,
-                lng: marker.longitude
-              }}
-              onClick={() => handleMarkerClick(marker)}
-              animation={window.google.maps.Animation.DROP}
-              icon={{
-                url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: new window.google.maps.Size(40, 40)
-              }}
-            />
-          ))}
+          {/* Use MarkerClusterer to group nearby markers */}
+          <MarkerClusterer options={clusterOptions}>
+            {(clusterer) => 
+              markers.map((marker, index) => (
+                <Marker
+                  key={index}
+                  position={{
+                    lat: marker.latitude,
+                    lng: marker.longitude
+                  }}
+                  onClick={() => handleMarkerClick(marker)}
+                  animation={window.google.maps.Animation.DROP}
+                  icon={{
+                    url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                    scaledSize: new window.google.maps.Size(40, 40)
+                  }}
+                  clusterer={clusterer}
+                />
+              ))
+            }
+          </MarkerClusterer>
 
           {/* Show info window when a marker is selected */}
           {selectedMarker && (
@@ -146,10 +180,15 @@ function EnhancedGooglePhotoMap({ markers }) {
                   alt={selectedMarker.fileName || "Location photo"} 
                   style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '4px' }} 
                 />
-                <p>
+                <p className="photo-coordinates">
                   Lat: {selectedMarker.latitude.toFixed(4)}, 
                   Lon: {selectedMarker.longitude.toFixed(4)}
                 </p>
+                {selectedMarker.dateTime && (
+                  <p className="photo-date">
+                    <span className="date-icon">📅</span> {selectedMarker.dateTime}
+                  </p>
+                )}
               </div>
             </InfoWindow>
           )}
@@ -166,6 +205,9 @@ function EnhancedGooglePhotoMap({ markers }) {
               onClick={() => handleThumbnailClick(marker)}
             >
               <img src={marker.imageUrl} alt={marker.fileName || `Photo ${index + 1}`} />
+              {marker.dateTime && (
+                <div className="thumbnail-date">{new Date(marker.timestamp).toLocaleDateString()}</div>
+              )}
             </div>
           ))}
         </div>

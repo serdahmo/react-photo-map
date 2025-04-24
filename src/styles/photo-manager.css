@@ -1,115 +1,198 @@
 /* src/styles/photo-manager.css */
 .photo-manager {
-    margin: 20px 0 30px;
-    padding: 20px;
-    background-color: var(--background-alt);
-    border-radius: 10px;
+  margin: 20px 0 30px;
+  padding: 25px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.035);
+}
+
+.manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.manager-header h3 {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.manager-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background-color: #f5f9ff;
+  border-radius: 30px;
+}
+
+.stat-icon {
+  font-size: 1.1rem;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #3498db;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.clear-all-button {
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  color: #e74c3c;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-all-button:hover {
+  background-color: #fee2e2;
+  border-color: #e74c3c;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.photo-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.photo-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.photo-image {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.photo-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.photo-card:hover .photo-image img {
+  transform: scale(1.05);
+}
+
+.remove-photo-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.photo-card:hover .remove-photo-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.remove-photo-button:hover {
+  background-color: rgba(231, 76, 60, 0.8);
+}
+
+.photo-details {
+  padding: 15px;
+}
+
+.photo-name {
+  margin: 0 0 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.metadata-icon {
+  font-size: 1rem;
+  color: #888;
+}
+
+.metadata-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metadata-item.location .metadata-icon {
+  color: #e74c3c;
+}
+
+.metadata-item.date .metadata-icon {
+  color: #3498db;
+}
+
+@media (max-width: 768px) {
+  .photo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
   
   .manager-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .manager-header h3 {
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  .clear-all-button {
-    background-color: var(--danger-color);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-  }
-  
-  .clear-all-button:hover {
-    background-color: #c0392b;
-  }
-  
-  .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    flex-direction: column;
+    align-items: flex-start;
     gap: 15px;
   }
   
-  .photo-item {
-    position: relative;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-  }
-  
-  .photo-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  .photo-thumbnail {
-    height: 150px;
-    overflow: hidden;
-  }
-  
-  .photo-thumbnail img {
+  .manager-stats {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    justify-content: space-between;
   }
-  
-  .photo-info {
-    padding: 10px;
-  }
-  
-  .photo-name {
-    margin: 0 0 5px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .photo-coords {
-    margin: 0;
-    color: var(--text-light);
-    font-size: 0.8rem;
-  }
-  
-  .remove-photo-button {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-  }
-  
-  .remove-photo-button:hover {
-    opacity: 1;
-  }
-  
-  @media (max-width: 768px) {
-    .photo-grid {
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-    
-    .photo-thumbnail {
-      height: 120px;
-    }
-  }
+}
